@@ -252,7 +252,7 @@ MStatus uninitializePlugin(MObject obj)
 //#include <clew/clew_cl.h>
 //#include <vector>
 //
-//class RandomCircle : public MPxDeformerNode
+//class RandomCircle : public MPxGeometryFilter
 //{
 // public:
 //  RandomCircle();
