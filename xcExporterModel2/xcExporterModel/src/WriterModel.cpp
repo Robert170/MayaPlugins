@@ -68,10 +68,16 @@ MStatus WriterModel::extractGeometry()
 		return MStatus::kFailure;
 	}*/
 
-  if (MStatus::kFailure == fMesh->getVertexNormals(true, fNormalArray, MSpace::kWorld)) {
-		MGlobal::displayError("MFnMesh::getVertexNormals ");
+  /*if (MStatus::kFailure == fMesh->getVertexNormals(true, fNormalArray, MSpace::kWorld)) {
+    MGlobal::displayError("MFnMesh::getVertexNormals ");
+    return MStatus::kFailure;
+  }*/
+
+	if (MStatus::kFailure == fMesh->getNormals(fNormalArray, MSpace::kWorld)) {
+		MGlobal::displayError("MFnMesh::getNormals"); 
 		return MStatus::kFailure;
 	}
+
 	if (MStatus::kFailure == fMesh->getCurrentUVSetName(fCurrentUVSetName)) {
 		MGlobal::displayError("MFnMesh::getCurrentUVSetName");
 		return MStatus::kFailure;

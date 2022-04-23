@@ -85,10 +85,11 @@ protected:
   //for storing general mesh information
   //
   MPointArray			fVertexArray;
-  MColorArray			fColorArray;
+  //MColorArray			fColorArray;
   MFloatVectorArray	fNormalArray;
   MFloatVectorArray	fTangentArray;
   MFloatVectorArray	fBinormalArray;
+  MIntArray idexes;
 
   //for storing DAG objects
   //

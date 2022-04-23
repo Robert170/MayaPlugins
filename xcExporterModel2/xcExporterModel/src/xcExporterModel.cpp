@@ -96,11 +96,11 @@ void xcExporterModel::writeHeader(std::ostream& os)
 //Summary:	outputs legend information before the main data
 //Args   :	os - an output stream to write to
 {
-  os << "Legend:\n"
+  /*os << "Legend:\n"
     << "Delimiter = TAB\n"
     << "() = coordinates\n"
     << "[] = vector\n"
-    << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n";
+    << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n";*/
 }
 
 

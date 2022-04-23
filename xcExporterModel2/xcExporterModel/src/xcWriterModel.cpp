@@ -127,29 +127,30 @@ MStatus xcWriterModel::writeToFile(ostream& os)
 		return MStatus::kFailure;
 	}
 
-	/*if (MStatus::kFailure == outputVertexInfo(os)) {
-		return MStatus::kFailure;
-	}*/
-
 	if (MStatus::kFailure == outputNormals(os)) {
 		return MStatus::kFailure;
 	}
 
-	if (MStatus::kFailure == outputTangents(os)) {
-		return MStatus::kFailure;
-	}
+  if (MStatus::kFailure == outputUVs(os)) {
+    return MStatus::kFailure;
+  }
 
-	if (MStatus::kFailure == outputBinormals(os)) {
-		return MStatus::kFailure;
-	}
+  if (MStatus::kFailure == outputVertexInfo(os)) {
+    return MStatus::kFailure;
+  }
+
+  /*if (MStatus::kFailure == outputTangents(os)) {
+    return MStatus::kFailure;
+  }
+
+  if (MStatus::kFailure == outputBinormals(os)) {
+    return MStatus::kFailure;
+  }*/
 
 	/*if (MStatus::kFailure == outputColors(os)) {
 		return MStatus::kFailure;
 	}*/
 
-	if (MStatus::kFailure == outputUVs(os)) {
-		return MStatus::kFailure;
-	}
 
 	if (MStatus::kFailure == outputSets(os)) {
 		return MStatus::kFailure;
@@ -166,43 +167,27 @@ MStatus xcWriterModel::outputFaces(ostream& os)
 //Returns:	MStatus::kSuccess if all faces were outputted
 //			MStatus::kFailure otherwise
 {
-	unsigned int faceCount = fMesh->numPolygons();
-	if (0 == faceCount) {
-		return MStatus::kFailure;
-	}
 
-	MStatus status;
-	MIntArray indexArray;
+  MIntArray triangleCounts;
+  
 
-	os << "Faces:  " << faceCount << "\n";
-	os << HEADER_LINE;
-	os << "Format:  Index|Vertex Indices\n";
-	os << LINE;
+  if (MStatus::kFailure == fMesh->getTriangles(triangleCounts, idexes)) {
+    return MStatus::kFailure;
+  }
 
-	unsigned int i;
-	for (i = 0; i < faceCount; i++) {
-		os << i << DELIMITER;
+  /*unsigned int tidexes = idexes.length();
 
-		unsigned int indexCount = fMesh->polygonVertexCount(i, &status);
-		if (MStatus::kFailure == status) {
-			MGlobal::displayError("MFnMesh::polygonVertexCount");
-			return MStatus::kFailure;
-		}
+  MIntArray indexArray;
 
-		status = fMesh->getPolygonVertices(i, indexArray);
-		if (MStatus::kFailure == status) {
-			MGlobal::displayError("MFnMesh::getPolygonVertices");
-			return MStatus::kFailure;
-		}
+  os << "Indices:  " << tidexes << "\n";
+  os << HEADER_LINE;
 
-		unsigned int j;
-		for (j = 0; j < indexCount; j++) {
-			os << indexArray[j] << " ";
-		}
-
-		os << "\n";
-	}
-	os << "\n\n";
+  for (unsigned int i = 0; i < tidexes; i += 3) {
+    os <<"I:" << DELIMITER <<  "(" << idexes[i] << ", "
+      << idexes[i + 1] << ", "
+      << idexes[i + 2] << ")" << "\n";
+  }
+  os << "\n\n";*/
 
 	return MStatus::kSuccess;
 }
@@ -221,17 +206,17 @@ MStatus xcWriterModel::outputVertices(ostream& os)
 		return MStatus::kFailure;
 	}
 
-	os << "Vertices:  " << vertexCount << "\n";
-	os << HEADER_LINE;
-	os << "Format:  Vertex|(x, y, z)\n";
-	os << LINE;
-	for (i = 0; i < vertexCount; i++) {
-		os << i << DELIMITER << "("
-			<< fVertexArray[i].x << ", "
-			<< fVertexArray[i].y << ", "
-			<< fVertexArray[i].z << ")\n";
-	}
-	os << "\n\n";
+	//os << "Vertices:  " << vertexCount << "\n";
+	//os << HEADER_LINE;
+	////os << "Format:  Vertex|(x, y, z)\n";
+	////os << LINE;
+	//for (i = 0; i < vertexCount; i++) {
+	//	os << "V:" << DELIMITER << "("
+	//		<< fVertexArray[i].x << ", "
+	//		<< fVertexArray[i].y << ", "
+	//		<< fVertexArray[i].z << ")\n";
+	//}
+	//os << "\n\n";
 
 	return MStatus::kSuccess;
 }
@@ -250,66 +235,78 @@ MStatus xcWriterModel::outputVertexInfo(ostream& os)
 	MStatus status;
 	MIntArray indexArray;
 
-	////output the header
-	//os << "Vertex Info:\n";
-	//os << HEADER_LINE;
-	//os << "Format:  Face|faceVertexIndex|vertexIndex|normalIndex|colorIndex|";
+	//output the header
+	os << "Mesh info:\n";
+	os << HEADER_LINE;
+	/*os << "Format:  Face|faceVertexIndex|vertexIndex|normalIndex|colorIndex|";*/
+	os << "Format: Vertex (x, y, z) | Normal (x, y, z) | UV (x, y)";
+	os << "\n";
 
-	////Add each uv set to the header
-	//UVSet* currUVSet;
-	//for (currUVSet = fHeadUVSet; currUVSet != NULL; currUVSet = currUVSet->next) {
-	//	os << "| UV_" << currUVSet->name;
-	//}
-	//os << "\n";
+	//Add each uv set to the header
+	UVSet* currUVSet;
+	/*for (currUVSet = fHeadUVSet; currUVSet != NULL; currUVSet = currUVSet->next) {
+		os << "| UV_" << currUVSet->name;
+	}
+	os << "\n";*/
 
 	//os << LINE;
 
-	//MIntArray normalIndexArray;
-	//int colorIndex, uvID;
+	MIntArray normalIndexArray;
+	int colorIndex, uvID;
 
-	//for (i = 0; i < faceCount; i++) {
+	for (i = 0; i < faceCount; i++) {
 
-	//	indexCount = fMesh->polygonVertexCount(i, &status);
-	//	if (MStatus::kFailure == status) {
-	//		MGlobal::displayError("MFnMesh::polygonVertexCount");
-	//		return MStatus::kFailure;
-	//	}
+		indexCount = fMesh->polygonVertexCount(i, &status);
+		if (MStatus::kFailure == status) {
+			MGlobal::displayError("MFnMesh::polygonVertexCount");
+			return MStatus::kFailure;
+		}
 
-	//	status = fMesh->getPolygonVertices(i, indexArray);
-	//	if (MStatus::kFailure == status) {
-	//		MGlobal::displayError("MFnMesh::getPolygonVertices");
-	//		return MStatus::kFailure;
-	//	}
+		status = fMesh->getPolygonVertices(i, indexArray);
+		if (MStatus::kFailure == status) {
+			MGlobal::displayError("MFnMesh::getPolygonVertices");
+			return MStatus::kFailure;
+		}
 
-	//	status = fMesh->getFaceNormalIds(i, normalIndexArray);
-	//	if (MStatus::kFailure == status) {
-	//		MGlobal::displayError("MFnMesh::getFaceNormalIds");
-	//		return MStatus::kFailure;
-	//	}
+		status = fMesh->getFaceNormalIds(i, normalIndexArray);
+		if (MStatus::kFailure == status) {
+			MGlobal::displayError("MFnMesh::getFaceNormalIds");
+			return MStatus::kFailure;
+		}
 
-	//	for (j = 0; j < indexCount; j++) {
-	//		status = fMesh->getFaceVertexColorIndex(i, j, colorIndex);
+		for (j = 0; j < indexCount; j++) {
+			status = fMesh->getFaceVertexColorIndex(i, j, colorIndex);
 
-	//		//output the face, face vertex index, vertex index, normal index, color index
-	//		//for the current vertex on the current face
-	//		os << i << DELIMITER << j << DELIMITER << indexArray[j] << DELIMITER
-	//			<< normalIndexArray[j] << DELIMITER << colorIndex << DELIMITER;
+			//output the face, face vertex index, vertex index, normal index, color index
+			//for the current vertex on the current face
 
-	//		//output each uv set index for the current vertex on the current face
-	//		for (currUVSet = fHeadUVSet; currUVSet != NULL; currUVSet = currUVSet->next) {
-	//			status = fMesh->getPolygonUVid(i, j, uvID, &currUVSet->name);
-	//			if (MStatus::kFailure == status) {
-	//				MGlobal::displayError("MFnMesh::getPolygonUVid");
-	//				return MStatus::kFailure;
-	//			}
-	//			os << DELIMITER << uvID;
-	//		}
-	//		os << "\n";
-	//	}
+			
+      os << "(" << fVertexArray[indexArray[j]].x << ", " //Vertex
+         << fVertexArray[indexArray[j]].y << ", "
+         << fVertexArray[indexArray[j]].z << ")" << DELIMITER
+         << "(" << fNormalArray[i].x << ", " //Normals
+         << fNormalArray[i].y << ", "
+         << fNormalArray[i].z << ")" << DELIMITER;
 
-	//	os << "\n";
-	//}
-	//os << "\n";
+			/*os << i << DELIMITER << j << DELIMITER << indexArray[j] << DELIMITER
+				<< normalIndexArray[j] << DELIMITER << colorIndex << DELIMITER;*/
+
+			//output each uv set index for the current vertex on the current face
+			for (currUVSet = fHeadUVSet; currUVSet != NULL; currUVSet = currUVSet->next) {
+				status = fMesh->getPolygonUVid(i, j, uvID, &currUVSet->name);
+				if (MStatus::kFailure == status) {
+					MGlobal::displayError("MFnMesh::getPolygonUVid");
+					return MStatus::kFailure;
+				}
+				//os << DELIMITER << uvID;
+        os << "(" << currUVSet->uArray[uvID] << ", " << currUVSet->vArray[uvID] << ")";
+			}
+			os << "\n";
+		}
+
+		os << "\n";
+	}
+	os << "\n";
 
 	return MStatus::kSuccess;
 }
@@ -326,19 +323,19 @@ MStatus xcWriterModel::outputNormals(ostream& os)
 		return MStatus::kFailure;
 	}
 
-	os << "Normals:  " << normalCount << "\n";
-	os << HEADER_LINE;
-	os << "Format:  Index|[x, y, z]\n";
-	os << LINE;
+	//os << "Normals:  " << normalCount << "\n";
+	//os << HEADER_LINE;
+	////os << "Format:  Index|[x, y, z]\n";
+	////os << LINE;
 
-	unsigned int i;
-	for (i = 0; i < normalCount; i++) {
-		os << i << DELIMITER << "["
-			<< fNormalArray[i].x << ", "
-			<< fNormalArray[i].y << ", "
-			<< fNormalArray[i].z << "]\n";
-	}
-	os << "\n\n";
+	//unsigned int i;
+	//for (i = 0; i < normalCount; i++) {
+	//	os << "N:" << DELIMITER << "("
+	//		<< fNormalArray[i].x << ", "
+	//		<< fNormalArray[i].y << ", "
+	//		<< fNormalArray[i].z << ")\n";
+	//}
+	//os << "\n\n";
 
 	return MStatus::kSuccess;
 }
@@ -399,34 +396,34 @@ MStatus xcWriterModel::outputBinormals(ostream& os)
 	return MStatus::kSuccess;
 }
 
-MStatus xcWriterModel::outputColors(ostream& os)
-//Summary:	outputs the colors for this polygonal mesh
-//Args   :	os - an output stream to write to
-//Returns:	MStatus::kSuccess if all colors were outputted
-//			MStatus::kFailure otherwise
-{
-	unsigned int colorCount = fColorArray.length();
-	if (0 == colorCount) {
-		return MStatus::kFailure;
-	}
-
-	os << "Colors:  " << colorCount << "\n";
-	os << HEADER_LINE;
-	os << "Format:  Index|R G B A\n";
-	os << LINE;
-
-	unsigned int i;
-	for (i = 0; i < colorCount; i++) {
-		os << i << DELIMITER
-			<< fColorArray[i].r << " "
-			<< fColorArray[i].g << " "
-			<< fColorArray[i].b << " "
-			<< fColorArray[i].a << "\n";
-	}
-	os << "\n\n";
-
-	return MStatus::kSuccess;
-}
+//MStatus xcWriterModel::outputColors(ostream& os)
+////Summary:	outputs the colors for this polygonal mesh
+////Args   :	os - an output stream to write to
+////Returns:	MStatus::kSuccess if all colors were outputted
+////			MStatus::kFailure otherwise
+//{
+//	unsigned int colorCount = fColorArray.length();
+//	if (0 == colorCount) {
+//		return MStatus::kFailure;
+//	}
+//
+//	os << "Colors:  " << colorCount << "\n";
+//	os << HEADER_LINE;
+//	os << "Format:  Index|R G B A\n";
+//	os << LINE;
+//
+//	unsigned int i;
+//	for (i = 0; i < colorCount; i++) {
+//		os << i << DELIMITER
+//			<< fColorArray[i].r << " "
+//			<< fColorArray[i].g << " "
+//			<< fColorArray[i].b << " "
+//			<< fColorArray[i].a << "\n";
+//	}
+//	os << "\n\n";
+//
+//	return MStatus::kSuccess;
+//}
 
 
 MStatus xcWriterModel::outputUVs(ostream& os)
@@ -435,25 +432,26 @@ MStatus xcWriterModel::outputUVs(ostream& os)
 //Returns:	MStatus::kSuccess if UV coordinates for all UV sets were outputted
 //			MStatus::kFailure otherwise
 {
-	UVSet* currUVSet;
-	unsigned int i, uvCount;
-	for (currUVSet = fHeadUVSet; currUVSet != NULL; currUVSet = currUVSet->next) {
-		if (currUVSet->name == fCurrentUVSetName) {
-			os << "Current ";
-		}
+  /*UVSet* currUVSet;
+  unsigned int i, uvCount;
+  for (currUVSet = fHeadUVSet; currUVSet != NULL; currUVSet = currUVSet->next) {
+    if (currUVSet->name == fCurrentUVSetName) {
+      os << "Current ";
+    }
 
-		os << "UV Set:  " << currUVSet->name << "\n";
-		uvCount = currUVSet->uArray.length();
-		os << "UV Count:  " << uvCount << "\n";
-		os << HEADER_LINE;
-		os << "Format:  Index|(u, v)\n";
-		os << LINE;
-		for (i = 0; i < uvCount; i++) {
-			os << i << DELIMITER << "(" << currUVSet->uArray[i] << ", " << currUVSet->vArray[i] << ")\n";
-		}
-		os << "\n";
-	}
-	os << "\n";
+    os << "UV Set:  " << currUVSet->name << "\n";
+    uvCount = currUVSet->uArray.length();
+    os << "UV Count:  " << uvCount << "\n";
+    os << HEADER_LINE;
+    os << "Format:  Index|(u, v)\n";
+    os << LINE;
+    for (i = 0; i < uvCount; i++) {
+      os << "UV:" << DELIMITER << "(" << currUVSet->uArray[i] << ", "
+          << currUVSet->vArray[i] << ")\n";
+    }
+    os << "\n";
+  }
+  os << "\n";*/
 	return MStatus::kSuccess;
 }
 
@@ -468,7 +466,7 @@ MStatus xcWriterModel::outputSingleSet(ostream& os, MString setName, MIntArray f
 	unsigned int i;
 	unsigned int faceCount = faces.length();
 
-	os << "Set:  " << setName << "\n";
+	//os << "Set:  " << setName << "\n";
 	os << HEADER_LINE;
 	os << "Faces:  ";
 	for (i = 0; i < faceCount; i++) {
