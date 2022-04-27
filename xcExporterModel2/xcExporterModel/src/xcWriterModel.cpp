@@ -236,7 +236,10 @@ MStatus xcWriterModel::outputVertexInfo(ostream& os)
 	MIntArray indexArray;
 
 	//output the header
-	os << "Mesh info:\n";
+	os << "Mesh_info";
+	os << "\n";
+
+  os << "Faces:  " << faceCount << "\n";
 	os << HEADER_LINE;
 	/*os << "Format:  Face|faceVertexIndex|vertexIndex|normalIndex|colorIndex|";*/
 	os << "Format: Vertex (x, y, z) | Normal (x, y, z) | UV (x, y)";
@@ -299,7 +302,8 @@ MStatus xcWriterModel::outputVertexInfo(ostream& os)
 					return MStatus::kFailure;
 				}
 				//os << DELIMITER << uvID;
-        os << "(" << currUVSet->uArray[uvID] << ", " << currUVSet->vArray[uvID] << ")";
+        os << "(" << currUVSet->uArray[uvID] << ", " << currUVSet->vArray[uvID] << ")"
+					 << DELIMITER;
 			}
 			os << "\n";
 		}
